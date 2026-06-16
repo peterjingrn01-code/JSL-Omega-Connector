@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>JSL Launcher C1 Alpha</title>
+<style>
+body{font-family:Arial;background:#111;color:white;text-align:center;padding:20px}
+h1{color:#00ffcc}
+button{padding:12px;margin:6px;border:none;border-radius:10px;background:#0aa;color:white}
+.panel{border:1px solid #00aa88;padding:12px;margin-top:15px;border-radius:10px}
+input,select{width:85%;padding:10px;margin:5px}
+</style>
+</head>
+<body>
+<h1>JSL Launcher C1 Alpha</h1>
+<p>Ω → Pair → Node → Network</p>
+
+<div class="panel">
+<h2>Role</h2>
+<select id="role">
+<option>Controller</option>
+<option>Agent</option>
+<option>Standalone</option>
+</select>
+<button onclick="saveRole()">Activate</button>
+<div id="roleView"></div>
+</div>
+
+<div class="panel">
+<h2>Ω Omega Registry</h2>
+<input id="omegaName" placeholder="Device Name">
+<input id="omegaAddr" placeholder="IP / Address / Note">
+<button onclick="addOmega()">Register Ω</button>
+<div id="omegas"></div>
+</div>
+
+<div class="panel">
+<h2>Pair Engine</h2>
+<input id="pairA" placeholder="Device A">
+<input id="pairB" placeholder="Device B">
+<button onclick="createPair()">Create Pair</button>
+<div id="pairs"></div>
+</div>
+
+<div class="panel">
+<h2>Node Registry</h2>
+<div id="nodes"></div>
+</div>
+
+<div class="panel">
+<h2>Controller Dashboard</h2>
+<div id="dashboard"></div>
+</div>
+
+<div class="panel">
+<h2>Network</h2>
+<button onclick="window.open('https://chatgpt.com')">ChatGPT</button>
+<button onclick="window.open('https://gmail.com')">Gmail</button>
+<button onclick="window.open('https://drive.google.com')">Drive</button>
+</div>
+
+<div class="panel">
+<h2>Dimensions</h2>
+<button onclick="openDim(0)">Dimension 0</button>
+<button onclick="openDim(1)">Dimension 1</button>
+<button onclick="openDim(2)">Dimension 2</button>
+<button onclick="openDim(3)">Dimension 3</button>
+<button onclick="openDim(4)">Dimension 4</button>
+<button onclick="openDim(5)">Dimension 5</button>
+<button onclick="openDim(6)">Dimension 6</button>
+<button onclick="openDim(7)">Dimension 7</button>
+<button onclick="openDim(8)">Dimension 8</button>
+<div id="dimView"></div>
+</div>
+
+<script>
+function saveRole(){
+ localStorage.setItem('C1_ROLE',role.value);
+ load();
+}
+function addOmega(){
+ let d=JSON.parse(localStorage.getItem('C1_OMEGA')||'[]');
+ d.push({
+   id:'Ω-'+String(d.length+1).padStart(4,'0'),
+   name:omegaName.value,
+   addr:omegaAddr.value,
+   status:'READY'
+ });
+ localStorage.setItem('C1_OMEGA',JSON.stringify(d));
+ load();
+}
+function createPair(){
+ let p=JSON.parse(localStorage.getItem('C1_PAIR')||'[]');
+ let n=JSON.parse(localStorage.getItem('C1_NODE')||'[]');
+ let pid='PAIR-'+String(p.length+1).padStart(4,'0');
+ let nid='NODE-'+String(n.length+1).padStart(4,'0');
+ p.push({id:pid,a:pairA.value,b:pairB.value});
+ n.push({id:nid,pair:pid});
+ localStorage.setItem('C1_PAIR',JSON.stringify(p));
+ localStorage.setItem('C1_NODE',JSON.stringify(n));
+ load();
+}
+function openDim(i){
+ let txt=prompt('Add item to Dimension '+i);
+ if(!txt) return;
+ let d=JSON.parse(localStorage.getItem('C1_DIM_'+i)||'[]');
+ d.push(txt);
+ localStorage.setItem('C1_DIM_'+i,JSON.stringify(d));
+ showDim(i);
+}
+function showDim(i){
+ let d=JSON.parse(localStorage.getItem('C1_DIM_'+i)||'[]');
+ dimView.innerHTML='<h3>Dimension '+i+'</h3>'+d.join('<br>');
+}
+function load(){
+ roleView.innerHTML='Role: '+(localStorage.getItem('C1_ROLE')||'None');
+ let o=JSON.parse(localStorage.getItem('C1_OMEGA')||'[]');
+ omegas.innerHTML=o.map(x=>x.id+' | '+x.name+' | '+x.addr+' | '+x.status).join('<br>');
+ dashboard.innerHTML=o.map(x=>'🖥 '+x.name+' | '+x.status).join('<br>');
+ let p=JSON.parse(localStorage.getItem('C1_PAIR')||'[]');
+ pairs.innerHTML=p.map(x=>x.id+' : '+x.a+' ↔ '+x.b).join('<br>');
+ let n=JSON.parse(localStorage.getItem('C1_NODE')||'[]');
+ nodes.innerHTML=n.map(x=>x.id+' ('+x.pair+')').join('<br>');
+}
+load();
+</script>
+</body>
+</html>
